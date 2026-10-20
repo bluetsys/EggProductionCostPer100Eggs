@@ -2,228 +2,298 @@
 <html lang="ko">
 
 <head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-E10YHPJ1VJ"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-E10YHPJ1VJ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
 
-        function gtag() {
-            dataLayer.push(arguments);
-        }
-        gtag('js', new Date());
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
 
-        gtag('config', 'G-E10YHPJ1VJ');
-    </script>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>계란 100개당 생산비 | 1998–2025 분석 리포트</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-        .github-fork-ribbon.fixed:before {
-            background-color: #090;
-        }
-    </style>
-    <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.3/gh-fork-ribbon.min.css" />
+    gtag("config", "G-E10YHPJ1VJ");
+  </script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>계란 100개당 생산비 | 1998–2025 분석 리포트</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
+  <style>
+    .github-fork-ribbon.fixed:before {
+      background-color: #090;
+    }
+  </style>
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.3/gh-fork-ribbon.min.css" />
 </head>
 
 <body>
-    <a target="_blank" class="github-fork-ribbon fixed" href="https://github.com/bluetsys/MigrationFlowAnalysis"
-        data-ribbon="Fork me on GitHub" title="Fork me on GitHub">Fork me on GitHub</a>
-    <header class="hero">
-        <div class="wrap">
-            <div class="eyebrow">AGRICULTURAL COST INTELLIGENCE / DATA REPORT</div>
-            <h1>계란 100개당 생산비<br>28년 추이 및 비용 구조 분석</h1>
-            <p>1998–2025년 생산비·경영비·사료비 변화, 연도별 비용 기여도, 사육 규모별 격차를 원자료 기반으로 탐색하는 분석 대시보드</p>
-            <div class="meta"><span class="chip">관측기간 1998–2025</span><span class="chip">CSV 5개 통합</span><span
-                    class="chip">연도·사육규모별 원자료 반영</span><span class="chip">브라우저 단독 실행</span></div>
+  <a target="_blank" class="github-fork-ribbon fixed" href="https://github.com/bluetsys/MigrationFlowAnalysis"
+    data-ribbon="Fork me on GitHub" title="Fork me on GitHub">Fork me on GitHub</a>
+  <header class="hero">
+    <div class="wrap">
+      <div class="eyebrow">AGRICULTURAL COST INTELLIGENCE / DATA REPORT</div>
+      <h1>계란 100개당 생산비<br />28년 추이 및 비용 구조 분석</h1>
+      <p>
+        1998–2025년 생산비·경영비·사료비 변화, 연도별 비용 기여도, 사육 규모별
+        격차를 원자료 기반으로 탐색하는 분석 대시보드
+      </p>
+      <div class="meta">
+        <span class="chip">관측기간 1998–2025</span><span class="chip">CSV 5개 통합</span><span class="chip">연도·사육규모별 원자료
+          반영</span><span class="chip">브라우저 단독 실행</span>
+      </div>
+    </div>
+  </header>
+  <main class="wrap">
+    <div class="controls">
+      <label class="ctrl">기준 연도<select id="year"></select></label><label class="ctrl">장기 추세 지표<select id="metric">
+          <option value="생산비">생산비</option>
+          <option value="경영비">경영비</option>
+          <option value="사료비">사료비</option>
+          <option value="가축비">가축비</option>
+          <option value="고용노동비">고용노동비</option>
+          <option value="부산물수입">부산물수입</option>
+        </select></label><button class="btn" id="reset">최신 연도로</button><button class="btn" onclick="window.print()">인쇄 /
+        PDF 저장</button>
+    </div>
+    <div class="kpis" id="kpis"></div>
+    <section class="section">
+      <div class="sectionhead">
+        <h2>01. 핵심 발견</h2>
+        <p>단순 수치 나열이 아닌 변화의 방향·규모·구조를 자동 계산합니다.</p>
+      </div>
+      <div class="insights" id="insights"></div>
+    </section>
+    <section class="section">
+      <div class="sectionhead">
+        <h2>02. 연도별 비용 변화</h2>
+        <p>
+          모든 연도는 원자료의 ‘평균’ 열 기준입니다. 장기 비교 시 산출 방식과
+          표본 변화에 유의하세요.
+        </p>
+      </div>
+      <div class="layout">
+        <div class="card">
+          <h3><span id="metricTitle">생산비</span> 연도별 추이</h3>
+          <svg class="chart" id="trend" role="img" aria-label="연도별 비용 추이"></svg>
+          <div class="analysis" id="trendNote"></div>
         </div>
-    </header>
-    <main class="wrap">
-        <div class="controls"><label class="ctrl">기준 연도<select id="year"></select></label><label class="ctrl">장기 추세
-                지표<select id="metric">
-                    <option value="생산비">생산비</option>
-                    <option value="경영비">경영비</option>
-                    <option value="사료비">사료비</option>
-                    <option value="가축비">가축비</option>
-                    <option value="고용노동비">고용노동비</option>
-                    <option value="부산물수입">부산물수입</option>
-                </select></label><button class="btn" id="reset">최신 연도로</button><button class="btn"
-                onclick="window.print()">인쇄 / PDF 저장</button></div>
-        <div class="kpis" id="kpis"></div>
-        <section class="section">
-            <div class="sectionhead">
-                <h2>01. 핵심 발견</h2>
-                <p>단순 수치 나열이 아닌 변화의 방향·규모·구조를 자동 계산합니다.</p>
-            </div>
-            <div class="insights" id="insights"></div>
-        </section>
-        <section class="section">
-            <div class="sectionhead">
-                <h2>02. 연도별 비용 변화</h2>
-                <p>모든 연도는 원자료의 ‘평균’ 열 기준입니다. 장기 비교 시 산출 방식과 표본 변화에 유의하세요.</p>
-            </div>
-            <div class="layout">
-                <div class="card">
-                    <h3><span id="metricTitle">생산비</span> 연도별 추이</h3><svg class="chart" id="trend" role="img"
-                        aria-label="연도별 비용 추이"></svg>
-                    <div class="analysis" id="trendNote"></div>
-                </div>
-                <div class="card">
-                    <h3>최근 연도별 전년 대비 증감률</h3><svg class="chart" id="yoy" role="img" aria-label="연도별 증감률"></svg>
-                    <div class="analysis" id="yoyNote"></div>
-                </div>
-            </div>
-        </section>
-        <section class="section">
-            <div class="sectionhead">
-                <h2>03. 비용 구성과 변동 요인</h2>
-                <p>사료비·가축비는 개별 원가 항목입니다. 경영비·생산비는 합계 지표로 구성비에 중복 합산하지 않습니다.</p>
-            </div>
-            <div class="layout equal">
-                <div class="card">
-                    <h3><span class="selYear"></span> 주요 비용 항목</h3>
-                    <div id="costBars"></div>
-                    <div class="analysis" id="costNote"></div>
-                </div>
-                <div class="card">
-                    <h3>전년 대비 주요 항목 변동</h3><svg class="chart" id="drivers" role="img" aria-label="비용 항목 증감"></svg>
-                    <div class="analysis" id="driversNote"></div>
-                </div>
-            </div>
-            <div class="layout equal" style="margin-top:16px">
-                <div class="card">
-                    <h3><span class="selYear"></span> 비용 구성 원형 차트</h3>
-                    <div class="donut-layout"><svg id="costPie" class="donut-svg" viewBox="0 0 320 320" role="img"
-                            aria-label="비용 항목별 원형 차트"></svg>
-                        <div id="pieLegend" class="donut-legend"></div>
-                    </div>
-                    <div class="analysis" id="pieNote"></div>
-                </div>
-                <div class="card">
-                    <h3>주요 비용 항목 설명</h3>
-                    <p class="mini">통계표에 등장하는 항목을 설명합니다. 연도별 명칭 차이와 세부 하위 항목도 반영합니다.</p>
-                    <div class="table-scroll description-table-wrap">
-                        <table class="description-table">
-                            <thead>
-                                <tr>
-                                    <th>이름</th>
-                                    <th>설명</th>
-                                </tr>
-                            </thead>
-                            <tbody id="costDescriptions"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </section>
-        <section class="section">
-            <div class="sectionhead">
-                <h2>04. 사육 규모별 생산비 차이</h2>
-                <p>해당 연도의 규모별 구간을 그대로 표시합니다. 구간 정의가 달라지는 연도 사이의 규모 그룹을 동일 집단으로 간주하지 않습니다.</p>
-            </div>
-            <div class="layout equal">
-                <div class="card">
-                    <h3><span class="selYear"></span> 규모별 생산비</h3>
-                    <div id="sizeBars"></div>
-                    <div class="analysis" id="sizeNote"></div>
-                </div>
-                <div class="card">
-                    <h3>연도별 규모 차이 확인</h3>
-                    <div class="compare-box"><label>비교 연도</label><select id="year2"></select></div>
-                    <div id="sizeCompare"></div>
-                    <div class="analysis" id="compareNote"></div>
-                </div>
-            </div>
-        </section>
-        <section class="section">
-            <div class="sectionhead">
-                <h2>05. 원자료 탐색</h2>
-                <p>1998~2025년 평균 및 선택 연도의 규모별 원가를 교차 확인할 수 있습니다.</p>
-            </div>
-            <div class="layout equal">
-                <div class="card">
-                    <h3>연도별 주요 비용 (평균)</h3>
-                    <div class="table-scroll">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>연도</th>
-                                    <th>생산비</th>
-                                    <th>전년비</th>
-                                    <th>경영비</th>
-                                    <th>사료비</th>
-                                    <th>가축비</th>
-                                    <th>사료비/생산비</th>
-                                </tr>
-                            </thead>
-                            <tbody id="annualRows"></tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="card">
-                    <h3><span class="selYear"></span> 규모·항목 상세</h3>
-                    <div class="table-scroll">
-                        <table>
-                            <thead id="detailHead"></thead>
-                            <tbody id="detailRows"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </section>
-        <section class="section" id="sources">
-            <div class="sectionhead">
-                <h2>06. 통계 출처</h2>
-                <p>국가데이터처 「농축산물생산비조사」 · KOSIS 국가통계포털 (확인 기준일: 2026.10.20)</p>
-            </div>
-            <div class="card">
-                <h3>계란 100개당 생산비 — 분석에 사용한 자료</h3>
-                <ol style="padding-left:1.4rem;line-height:2.1;overflow-wrap:anywhere">
-                    <li><a href="https://kosis.kr/statHtml/statHtml.do?orgId=101&amp;tblId=DT_1EE219&amp;conn_path=I2"
-                            target="_blank" rel="noopener noreferrer">DT_1EE219 — 2002년 기준 계란 100개당 생산비</a> <span
-                            style="color:var(--muted)">(CSV: 1998–2002)</span></li>
-                    <li><a href="https://kosis.kr/statHtml/statHtml.do?orgId=101&amp;tblId=DT_1EE0120&amp;conn_path=I2"
-                            target="_blank" rel="noopener noreferrer">DT_1EE0120 — 2007년 기준 계란 100개당 생산비</a> <span
-                            style="color:var(--muted)">(CSV: 2003–2007)</span></li>
-                    <li><span>CSV: 2008–2017년 계란 100개당 생산비</span> <span style="color:var(--muted)">(이번에 제공된 공식 통계표 링크 중
-                            해당 기간 전용 링크는 미확인)</span></li>
-                    <li><a href="https://kosis.kr/statHtml/statHtml.do?orgId=101&amp;tblId=DT_2EE309&amp;conn_path=I2"
-                            target="_blank" rel="noopener noreferrer">DT_2EE309 — 2022년 기준 계란 100개당 생산비</a> <span
-                            style="color:var(--muted)">(CSV: 2018–2022)</span></li>
-                    <li><a href="https://kosis.kr/statHtml/statHtml.do?orgId=101&amp;tblId=DT_2EE309_23&amp;conn_path=I2"
-                            target="_blank" rel="noopener noreferrer">DT_2EE309_23 — 2025년 기준 계란 100개당 생산비</a> <span
-                            style="color:var(--muted)">(CSV: 2023–2025)</span></li>
-                </ol>
-                <p style="margin-top:1rem;color:var(--muted)">추가 제공 출처(본 계란 생산비 분석에는 사용하지 않음): <a
-                        href="https://kosis.kr/statHtml/statHtml.do?orgId=101&amp;tblId=DT_1EE021&amp;conn_path=I2"
-                        target="_blank" rel="noopener noreferrer">DT_1EE021 — 2022년 육우 두당 사육비</a>. 계란 생산비와 대상 및 단위가 달라
-                    별도 참고 자료로 표시했습니다.</p>
-                <p style="color:var(--muted)">출처 표기: 국가데이터처, 「농축산물생산비조사」, KOSIS, 조회 기준 2026.10.20.</p>
-            </div>
-        </section>
-        <div class="foot"><strong>자료 범위와 해석 주의사항</strong><br>분석 데이터: KOSIS 「농축산물생산비조사」에서 제공된 ‘계란 100개당 생산비’ CSV 5개
-            (1998–2002, 2003–2007, 2008–2017, 2018–2022, 2023–2025). 파일 내부에 별도 기관명·공표 단위·표본 설계 메타데이터는 포함되지 않았습니다. 수치는
-            CSV 원값 그대로 사용하며, 통상적인 생산비 표기 관행에 따라 원/100개로 표시했습니다. 공식 단위는 원출처 대조가 필요합니다.<br>연도별 사육 규모 구분은
-            1998/2003/2008/2018/2023년에 변경되었습니다. 그룹 비교는 각 연도 내부를 기준으로 해석합니다. 평균은 규모별 단순평균을 재계산한 값이 아닌 원자료의 제공 평균입니다. 원가
-            항목 중 상위·하위 항목(예: 농구비와 그 감가상각비)은 중복 합산하지 않습니다. 항목 증감액은 회계상 생산비 증감액의 정확한 기여도 분해가 아니며, 항목별 변화에 대한 참고 분석입니다. 물가
-            조정 없는 명목 금액입니다. 음수·결측치 및 0은 원자료 상태를 유지합니다.</div>
-    </main>
-    <script src="data.js"></script>
-    <script src="app.js"></script>
-    <script type="text/javascript">
-        var sc_project = 13139524;
-        var sc_invisible = 1;
-        var sc_security = "83232f9f";
-    </script>
-    <script type="text/javascript" src="https://www.statcounter.com/counter/counter.js" async></script>
-    <noscript>
-        <div class="statcounter"><a title="Web Analytics" href="https://statcounter.com/" target="_blank"><img
-                    class="statcounter" src="https://c.statcounter.com/13139524/0/83232f9f/1/" alt="Web Analytics"
-                    referrerPolicy="no-referrer-when-downgrade"></a></div>
-    </noscript>
-    <!-- End of Statcounter Code -->
-    <script type="text/javascript" src="//wcs.naver.net/wcslog.js"></script>
+        <div class="card">
+          <h3>최근 연도별 전년 대비 증감률</h3>
+          <svg class="chart" id="yoy" role="img" aria-label="연도별 증감률"></svg>
+          <div class="analysis" id="yoyNote"></div>
+        </div>
+      </div>
+      <div class="card sankey-card">
+        <h3>
+          <span id="metricSankeyTitle">생산비</span> 선택 연도 주요 비용 3단계
+          분류 (Sankey)
+        </h3>
+        <div class="sankey-scroll">
+          <svg class="chart sankey-chart" id="yearSankey" role="img" aria-label="선택 연도 주요 비용 3단계 Sankey 차트"></svg>
+        </div>
+        <div class="analysis" id="sankeyNote"></div>
+      </div>
+    </section>
+    <section class="section">
+      <div class="sectionhead">
+        <h2>03. 비용 구성과 변동 요인</h2>
+        <p>
+          사료비·가축비는 개별 원가 항목입니다. 경영비·생산비는 합계 지표로
+          구성비에 중복 합산하지 않습니다.
+        </p>
+      </div>
+      <div class="layout equal">
+        <div class="card">
+          <h3><span class="selYear"></span> 주요 비용 항목</h3>
+          <div id="costBars"></div>
+          <div class="analysis" id="costNote"></div>
+        </div>
+        <div class="card">
+          <h3>전년 대비 주요 항목 변동</h3>
+          <svg class="chart" id="drivers" role="img" aria-label="비용 항목 증감"></svg>
+          <div class="analysis" id="driversNote"></div>
+        </div>
+      </div>
+      <div class="layout equal" style="margin-top: 16px">
+        <div class="card">
+          <h3><span class="selYear"></span> 비용 구성 원형 차트</h3>
+          <div class="donut-layout">
+            <svg id="costPie" class="donut-svg" viewBox="0 0 320 320" role="img" aria-label="비용 항목별 원형 차트"></svg>
+            <div id="pieLegend" class="donut-legend"></div>
+          </div>
+          <div class="analysis" id="pieNote"></div>
+        </div>
+        <div class="card">
+          <h3>주요 비용 항목 설명</h3>
+          <p class="mini">
+            통계표에 등장하는 항목을 설명합니다. 연도별 명칭 차이와 세부 하위
+            항목도 반영합니다.
+          </p>
+          <div class="table-scroll description-table-wrap">
+            <table class="description-table">
+              <thead>
+                <tr>
+                  <th>이름</th>
+                  <th>설명</th>
+                </tr>
+              </thead>
+              <tbody id="costDescriptions"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="section">
+      <div class="sectionhead">
+        <h2>04. 사육 규모별 생산비 차이</h2>
+        <p>
+          해당 연도의 규모별 구간을 그대로 표시합니다. 구간 정의가 달라지는
+          연도 사이의 규모 그룹을 동일 집단으로 간주하지 않습니다.
+        </p>
+      </div>
+      <div class="layout equal">
+        <div class="card">
+          <h3><span class="selYear"></span> 규모별 생산비</h3>
+          <div id="sizeBars"></div>
+          <div class="analysis" id="sizeNote"></div>
+        </div>
+        <div class="card">
+          <h3>연도별 규모 차이 확인</h3>
+          <div class="compare-box">
+            <label>비교 연도</label><select id="year2"></select>
+          </div>
+          <div id="sizeCompare"></div>
+          <div class="analysis" id="compareNote"></div>
+        </div>
+      </div>
+    </section>
+    <section class="section">
+      <div class="sectionhead">
+        <h2>05. 원자료 탐색</h2>
+        <p>
+          1998~2025년 평균 및 선택 연도의 규모별 원가를 교차 확인할 수
+          있습니다.
+        </p>
+      </div>
+      <div class="layout equal">
+        <div class="card">
+          <h3>연도별 주요 비용 (평균)</h3>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>연도</th>
+                  <th>생산비</th>
+                  <th>전년비</th>
+                  <th>경영비</th>
+                  <th>사료비</th>
+                  <th>가축비</th>
+                  <th>사료비/생산비</th>
+                </tr>
+              </thead>
+              <tbody id="annualRows"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <h3><span class="selYear"></span> 규모·항목 상세</h3>
+          <div class="table-scroll">
+            <table>
+              <thead id="detailHead"></thead>
+              <tbody id="detailRows"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="section" id="sources">
+      <div class="sectionhead">
+        <h2>06. 통계 출처</h2>
+        <p>
+          국가데이터처 「농축산물생산비조사」 · KOSIS 국가통계포털 (확인
+          기준일: 2026.10.20)
+        </p>
+      </div>
+      <div class="card">
+        <h3>계란 100개당 생산비 — 분석에 사용한 자료</h3>
+        <ol style="
+              padding-left: 1.4rem;
+              line-height: 2.1;
+              overflow-wrap: anywhere;
+            ">
+          <li>
+            <a href="https://kosis.kr/statHtml/statHtml.do?orgId=101&amp;tblId=DT_1EE219&amp;conn_path=I2"
+              target="_blank" rel="noopener noreferrer">DT_1EE219 — 2002년 기준 계란 100개당 생산비</a>
+            <span style="color: var(--muted)">(CSV: 1998–2002)</span>
+          </li>
+          <li>
+            <a href="https://kosis.kr/statHtml/statHtml.do?orgId=101&amp;tblId=DT_1EE0120&amp;conn_path=I2"
+              target="_blank" rel="noopener noreferrer">DT_1EE0120 — 2007년 기준 계란 100개당 생산비</a>
+            <span style="color: var(--muted)">(CSV: 2003–2007)</span>
+          </li>
+          <li>
+            <span>CSV: 2008–2017년 계란 100개당 생산비</span>
+            <span style="color: var(--muted)">(이번에 제공된 공식 통계표 링크 중 해당 기간 전용 링크는
+              미확인)</span>
+          </li>
+          <li>
+            <a href="https://kosis.kr/statHtml/statHtml.do?orgId=101&amp;tblId=DT_2EE309&amp;conn_path=I2"
+              target="_blank" rel="noopener noreferrer">DT_2EE309 — 2022년 기준 계란 100개당 생산비</a>
+            <span style="color: var(--muted)">(CSV: 2018–2022)</span>
+          </li>
+          <li>
+            <a href="https://kosis.kr/statHtml/statHtml.do?orgId=101&amp;tblId=DT_2EE309_23&amp;conn_path=I2"
+              target="_blank" rel="noopener noreferrer">DT_2EE309_23 — 2025년 기준 계란 100개당 생산비</a>
+            <span style="color: var(--muted)">(CSV: 2023–2025)</span>
+          </li>
+        </ol>
+        <p style="margin-top: 1rem; color: var(--muted)">
+          추가 제공 출처(본 계란 생산비 분석에는 사용하지 않음):
+          <a href="https://kosis.kr/statHtml/statHtml.do?orgId=101&amp;tblId=DT_1EE021&amp;conn_path=I2" target="_blank"
+            rel="noopener noreferrer">DT_1EE021 — 2022년 육우 두당 사육비</a>. 계란 생산비와 대상 및 단위가 달라 별도 참고 자료로 표시했습니다.
+        </p>
+        <p style="color: var(--muted)">
+          출처 표기: 국가데이터처, 「농축산물생산비조사」, KOSIS, 조회 기준
+          2026.10.20.
+        </p>
+      </div>
+    </section>
+    <div class="foot">
+      <strong>자료 범위와 해석 주의사항</strong><br />분석 데이터: KOSIS
+      「농축산물생산비조사」에서 제공된 ‘계란 100개당 생산비’ CSV 5개
+      (1998–2002, 2003–2007, 2008–2017, 2018–2022, 2023–2025). 파일 내부에
+      별도 기관명·공표 단위·표본 설계 메타데이터는 포함되지 않았습니다. 수치는
+      CSV 원값 그대로 사용하며, 통상적인 생산비 표기 관행에 따라 원/100개로
+      표시했습니다. 공식 단위는 원출처 대조가 필요합니다.<br />연도별 사육
+      규모 구분은 1998/2003/2008/2018/2023년에 변경되었습니다. 그룹 비교는 각
+      연도 내부를 기준으로 해석합니다. 평균은 규모별 단순평균을 재계산한 값이
+      아닌 원자료의 제공 평균입니다. 원가 항목 중 상위·하위 항목(예: 농구비와
+      그 감가상각비)은 중복 합산하지 않습니다. 항목 증감액은 회계상 생산비
+      증감액의 정확한 기여도 분해가 아니며, 항목별 변화에 대한 참고
+      분석입니다. 물가 조정 없는 명목 금액입니다. 음수·결측치 및 0은 원자료
+      상태를 유지합니다.
+    </div>
+  </main>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+  <script type="text/javascript">
+    var sc_project = 13139524;
+    var sc_invisible = 1;
+    var sc_security = "83232f9f";
+  </script>
+  <script type="text/javascript" src="https://www.statcounter.com/counter/counter.js" async></script>
+  <noscript>
+    <div class="statcounter">
+      <a title="Web Analytics" href="https://statcounter.com/" target="_blank"><img class="statcounter"
+          src="https://c.statcounter.com/13139524/0/83232f9f/1/" alt="Web Analytics"
+          referrerpolicy="no-referrer-when-downgrade" /></a>
+    </div>
+  </noscript>
+  <!-- End of Statcounter Code -->
+  <script type="text/javascript" src="//wcs.naver.net/wcslog.js"></script>
     <script type="text/javascript">
         if (!wcs_add) var wcs_add = {};
         wcs_add["wa"] = "14cd277c95fd60";
